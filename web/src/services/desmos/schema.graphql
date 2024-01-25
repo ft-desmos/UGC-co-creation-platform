@@ -1,0 +1,1282 @@
+# This file was generated based on ".graphqlconfig". Do not edit manually.
+
+schema {
+    query: query_root
+    subscription: subscription_root
+}
+
+"whether this query should be cached (Hasura Cloud only)"
+directive @cached(
+    "refresh the cache entry"
+    refresh: Boolean! = false,
+    "measured in seconds"
+    ttl: Int! = 60
+) on QUERY
+
+"columns and relationships of \"application_link\""
+type application_link {
+    application: String!
+    creation_time: timestamp!
+    expiration_time: timestamp!
+    "An object relationship"
+    oracle_request: application_link_oracle_request
+    "An object relationship"
+    profile: profile
+    result(
+        "JSON select path"
+        path: String
+    ): jsonb
+    state: String!
+    user_address: String!
+    username: String!
+}
+
+"columns and relationships of \"application_link_oracle_request\""
+type application_link_oracle_request {
+    call_data(
+        "JSON select path"
+        path: String
+    ): jsonb!
+    client_id: String!
+    request_id: bigint!
+    script_id: bigint!
+}
+
+"columns and relationships of \"application_link_score\""
+type application_link_score {
+    details(
+        "JSON select path"
+        path: String
+    ): jsonb!
+    score: Int!
+    timestamp: timestamp!
+}
+
+"columns and relationships of \"chain_link\""
+type chain_link {
+    "An object relationship"
+    chain_config: chain_link_chain_config!
+    "An array relationship"
+    chain_link_proofs(
+        "distinct select on columns"
+        distinct_on: [chain_link_proof_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [chain_link_proof_order_by!],
+        "filter the rows returned"
+        where: chain_link_proof_bool_exp
+    ): [chain_link_proof!]!
+    creation_time: timestamp!
+    external_address: String!
+    height: bigint!
+    "An object relationship"
+    profile: profile
+    "An object relationship"
+    proof: chain_link_proof
+    user_address: String!
+}
+
+"columns and relationships of \"chain_link_chain_config\""
+type chain_link_chain_config {
+    "An array relationship"
+    chain_links(
+        "distinct select on columns"
+        distinct_on: [chain_link_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [chain_link_order_by!],
+        "filter the rows returned"
+        where: chain_link_bool_exp
+    ): [chain_link!]!
+    name: String!
+}
+
+"columns and relationships of \"chain_link_proof\""
+type chain_link_proof {
+    "An object relationship"
+    chain_link: chain_link!
+    plain_text: String!
+    public_key(
+        "JSON select path"
+        path: String
+    ): jsonb!
+    signature: String!
+}
+
+"columns and relationships of \"dtag_transfer_requests\""
+type dtag_transfer_requests {
+    "An object relationship"
+    receiver: profile
+    receiver_address: String!
+    "An object relationship"
+    sender: profile
+    sender_address: String!
+}
+
+"columns and relationships of \"profile\""
+type profile {
+    address: String!
+    "An array relationship"
+    applications_links(
+        "distinct select on columns"
+        distinct_on: [application_link_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [application_link_order_by!],
+        "filter the rows returned"
+        where: application_link_bool_exp
+    ): [application_link!]!
+    bio: String!
+    "An array relationship"
+    chain_links(
+        "distinct select on columns"
+        distinct_on: [chain_link_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [chain_link_order_by!],
+        "filter the rows returned"
+        where: chain_link_bool_exp
+    ): [chain_link!]!
+    cover_pic: String!
+    creation_time: timestamp!
+    dtag: String!
+    "An array relationship"
+    incoming_dtag_transfer_requests(
+        "distinct select on columns"
+        distinct_on: [dtag_transfer_requests_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [dtag_transfer_requests_order_by!],
+        "filter the rows returned"
+        where: dtag_transfer_requests_bool_exp
+    ): [dtag_transfer_requests!]!
+    nickname: String!
+    "An array relationship"
+    outgoing_dtag_transfer_requests(
+        "distinct select on columns"
+        distinct_on: [dtag_transfer_requests_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [dtag_transfer_requests_order_by!],
+        "filter the rows returned"
+        where: dtag_transfer_requests_bool_exp
+    ): [dtag_transfer_requests!]!
+    profile_pic: String!
+}
+
+"aggregated selection of \"profile\""
+type profile_aggregate {
+    aggregate: profile_aggregate_fields
+    nodes: [profile!]!
+}
+
+"aggregate fields of \"profile\""
+type profile_aggregate_fields {
+    count(columns: [profile_select_column!], distinct: Boolean): Int!
+    max: profile_max_fields
+    min: profile_min_fields
+}
+
+"aggregate max on columns"
+type profile_max_fields {
+    address: String
+    bio: String
+    cover_pic: String
+    creation_time: timestamp
+    dtag: String
+    nickname: String
+    profile_pic: String
+}
+
+"aggregate min on columns"
+type profile_min_fields {
+    address: String
+    bio: String
+    cover_pic: String
+    creation_time: timestamp
+    dtag: String
+    nickname: String
+    profile_pic: String
+}
+
+"columns and relationships of \"profiles_params\""
+type profiles_params {
+    params(
+        "JSON select path"
+        path: String
+    ): jsonb!
+}
+
+type query_root {
+    "fetch data from the table: \"application_link\""
+    application_link(
+        "distinct select on columns"
+        distinct_on: [application_link_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [application_link_order_by!],
+        "filter the rows returned"
+        where: application_link_bool_exp
+    ): [application_link!]!
+    "fetch data from the table: \"application_link_oracle_request\""
+    application_link_oracle_request(
+        "distinct select on columns"
+        distinct_on: [application_link_oracle_request_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [application_link_oracle_request_order_by!],
+        "filter the rows returned"
+        where: application_link_oracle_request_bool_exp
+    ): [application_link_oracle_request!]!
+    "fetch data from the table: \"application_link_score\""
+    application_link_score(
+        "distinct select on columns"
+        distinct_on: [application_link_score_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [application_link_score_order_by!],
+        "filter the rows returned"
+        where: application_link_score_bool_exp
+    ): [application_link_score!]!
+    "fetch data from the table: \"chain_link\""
+    chain_link(
+        "distinct select on columns"
+        distinct_on: [chain_link_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [chain_link_order_by!],
+        "filter the rows returned"
+        where: chain_link_bool_exp
+    ): [chain_link!]!
+    "fetch data from the table: \"chain_link_chain_config\""
+    chain_link_chain_config(
+        "distinct select on columns"
+        distinct_on: [chain_link_chain_config_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [chain_link_chain_config_order_by!],
+        "filter the rows returned"
+        where: chain_link_chain_config_bool_exp
+    ): [chain_link_chain_config!]!
+    "fetch data from the table: \"chain_link_proof\""
+    chain_link_proof(
+        "distinct select on columns"
+        distinct_on: [chain_link_proof_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [chain_link_proof_order_by!],
+        "filter the rows returned"
+        where: chain_link_proof_bool_exp
+    ): [chain_link_proof!]!
+    "fetch data from the table: \"dtag_transfer_requests\""
+    dtag_transfer_requests(
+        "distinct select on columns"
+        distinct_on: [dtag_transfer_requests_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [dtag_transfer_requests_order_by!],
+        "filter the rows returned"
+        where: dtag_transfer_requests_bool_exp
+    ): [dtag_transfer_requests!]!
+    "fetch data from the table: \"profile\""
+    profile(
+        "distinct select on columns"
+        distinct_on: [profile_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [profile_order_by!],
+        "filter the rows returned"
+        where: profile_bool_exp
+    ): [profile!]!
+    "fetch aggregated fields from the table: \"profile\""
+    profile_aggregate(
+        "distinct select on columns"
+        distinct_on: [profile_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [profile_order_by!],
+        "filter the rows returned"
+        where: profile_bool_exp
+    ): profile_aggregate!
+    "fetch data from the table: \"profile\" using primary key columns"
+    profile_by_pk(address: String!): profile
+    "fetch data from the table: \"profiles_params\""
+    profiles_params(
+        "distinct select on columns"
+        distinct_on: [profiles_params_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [profiles_params_order_by!],
+        "filter the rows returned"
+        where: profiles_params_bool_exp
+    ): [profiles_params!]!
+    "fetch data from the table: \"user_block\""
+    user_block(
+        "distinct select on columns"
+        distinct_on: [user_block_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [user_block_order_by!],
+        "filter the rows returned"
+        where: user_block_bool_exp
+    ): [user_block!]!
+    "fetch data from the table: \"user_relationship\""
+    user_relationship(
+        "distinct select on columns"
+        distinct_on: [user_relationship_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [user_relationship_order_by!],
+        "filter the rows returned"
+        where: user_relationship_bool_exp
+    ): [user_relationship!]!
+    "fetch aggregated fields from the table: \"user_relationship\""
+    user_relationship_aggregate(
+        "distinct select on columns"
+        distinct_on: [user_relationship_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [user_relationship_order_by!],
+        "filter the rows returned"
+        where: user_relationship_bool_exp
+    ): user_relationship_aggregate!
+}
+
+type subscription_root {
+    "fetch data from the table: \"application_link\""
+    application_link(
+        "distinct select on columns"
+        distinct_on: [application_link_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [application_link_order_by!],
+        "filter the rows returned"
+        where: application_link_bool_exp
+    ): [application_link!]!
+    "fetch data from the table: \"application_link_oracle_request\""
+    application_link_oracle_request(
+        "distinct select on columns"
+        distinct_on: [application_link_oracle_request_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [application_link_oracle_request_order_by!],
+        "filter the rows returned"
+        where: application_link_oracle_request_bool_exp
+    ): [application_link_oracle_request!]!
+    "fetch data from the table: \"application_link_score\""
+    application_link_score(
+        "distinct select on columns"
+        distinct_on: [application_link_score_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [application_link_score_order_by!],
+        "filter the rows returned"
+        where: application_link_score_bool_exp
+    ): [application_link_score!]!
+    "fetch data from the table: \"chain_link\""
+    chain_link(
+        "distinct select on columns"
+        distinct_on: [chain_link_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [chain_link_order_by!],
+        "filter the rows returned"
+        where: chain_link_bool_exp
+    ): [chain_link!]!
+    "fetch data from the table: \"chain_link_chain_config\""
+    chain_link_chain_config(
+        "distinct select on columns"
+        distinct_on: [chain_link_chain_config_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [chain_link_chain_config_order_by!],
+        "filter the rows returned"
+        where: chain_link_chain_config_bool_exp
+    ): [chain_link_chain_config!]!
+    "fetch data from the table: \"chain_link_proof\""
+    chain_link_proof(
+        "distinct select on columns"
+        distinct_on: [chain_link_proof_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [chain_link_proof_order_by!],
+        "filter the rows returned"
+        where: chain_link_proof_bool_exp
+    ): [chain_link_proof!]!
+    "fetch data from the table: \"dtag_transfer_requests\""
+    dtag_transfer_requests(
+        "distinct select on columns"
+        distinct_on: [dtag_transfer_requests_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [dtag_transfer_requests_order_by!],
+        "filter the rows returned"
+        where: dtag_transfer_requests_bool_exp
+    ): [dtag_transfer_requests!]!
+    "fetch data from the table: \"profile\""
+    profile(
+        "distinct select on columns"
+        distinct_on: [profile_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [profile_order_by!],
+        "filter the rows returned"
+        where: profile_bool_exp
+    ): [profile!]!
+    "fetch aggregated fields from the table: \"profile\""
+    profile_aggregate(
+        "distinct select on columns"
+        distinct_on: [profile_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [profile_order_by!],
+        "filter the rows returned"
+        where: profile_bool_exp
+    ): profile_aggregate!
+    "fetch data from the table: \"profile\" using primary key columns"
+    profile_by_pk(address: String!): profile
+    "fetch data from the table: \"profiles_params\""
+    profiles_params(
+        "distinct select on columns"
+        distinct_on: [profiles_params_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [profiles_params_order_by!],
+        "filter the rows returned"
+        where: profiles_params_bool_exp
+    ): [profiles_params!]!
+    "fetch data from the table: \"user_block\""
+    user_block(
+        "distinct select on columns"
+        distinct_on: [user_block_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [user_block_order_by!],
+        "filter the rows returned"
+        where: user_block_bool_exp
+    ): [user_block!]!
+    "fetch data from the table: \"user_relationship\""
+    user_relationship(
+        "distinct select on columns"
+        distinct_on: [user_relationship_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [user_relationship_order_by!],
+        "filter the rows returned"
+        where: user_relationship_bool_exp
+    ): [user_relationship!]!
+    "fetch aggregated fields from the table: \"user_relationship\""
+    user_relationship_aggregate(
+        "distinct select on columns"
+        distinct_on: [user_relationship_select_column!],
+        "limit the number of rows returned"
+        limit: Int,
+        "skip the first n rows. Use only with order_by"
+        offset: Int,
+        "sort the rows by one or more columns"
+        order_by: [user_relationship_order_by!],
+        "filter the rows returned"
+        where: user_relationship_bool_exp
+    ): user_relationship_aggregate!
+}
+
+"columns and relationships of \"user_block\""
+type user_block {
+    "An object relationship"
+    blocked: profile
+    blocked_address: String
+    "An object relationship"
+    blocker: profile
+    blocker_address: String
+    reason: String
+    subspace_id: bigint!
+}
+
+"columns and relationships of \"user_relationship\""
+type user_relationship {
+    "An object relationship"
+    counterparty: profile
+    counterparty_address: String!
+    "An object relationship"
+    creator: profile
+    creator_address: String!
+    subspace_id: bigint!
+}
+
+"aggregated selection of \"user_relationship\""
+type user_relationship_aggregate {
+    aggregate: user_relationship_aggregate_fields
+    nodes: [user_relationship!]!
+}
+
+"aggregate fields of \"user_relationship\""
+type user_relationship_aggregate_fields {
+    avg: user_relationship_avg_fields
+    count(columns: [user_relationship_select_column!], distinct: Boolean): Int!
+    max: user_relationship_max_fields
+    min: user_relationship_min_fields
+    stddev: user_relationship_stddev_fields
+    stddev_pop: user_relationship_stddev_pop_fields
+    stddev_samp: user_relationship_stddev_samp_fields
+    sum: user_relationship_sum_fields
+    var_pop: user_relationship_var_pop_fields
+    var_samp: user_relationship_var_samp_fields
+    variance: user_relationship_variance_fields
+}
+
+"aggregate avg on columns"
+type user_relationship_avg_fields {
+    subspace_id: Float
+}
+
+"aggregate max on columns"
+type user_relationship_max_fields {
+    counterparty_address: String
+    creator_address: String
+    subspace_id: bigint
+}
+
+"aggregate min on columns"
+type user_relationship_min_fields {
+    counterparty_address: String
+    creator_address: String
+    subspace_id: bigint
+}
+
+"aggregate stddev on columns"
+type user_relationship_stddev_fields {
+    subspace_id: Float
+}
+
+"aggregate stddev_pop on columns"
+type user_relationship_stddev_pop_fields {
+    subspace_id: Float
+}
+
+"aggregate stddev_samp on columns"
+type user_relationship_stddev_samp_fields {
+    subspace_id: Float
+}
+
+"aggregate sum on columns"
+type user_relationship_sum_fields {
+    subspace_id: bigint
+}
+
+"aggregate var_pop on columns"
+type user_relationship_var_pop_fields {
+    subspace_id: Float
+}
+
+"aggregate var_samp on columns"
+type user_relationship_var_samp_fields {
+    subspace_id: Float
+}
+
+"aggregate variance on columns"
+type user_relationship_variance_fields {
+    subspace_id: Float
+}
+
+"select columns of table \"application_link_oracle_request\""
+enum application_link_oracle_request_select_column {
+    "column name"
+    call_data
+    "column name"
+    client_id
+    "column name"
+    request_id
+    "column name"
+    script_id
+}
+
+"select columns of table \"application_link_score\""
+enum application_link_score_select_column {
+    "column name"
+    details
+    "column name"
+    score
+    "column name"
+    timestamp
+}
+
+"select columns of table \"application_link\""
+enum application_link_select_column {
+    "column name"
+    application
+    "column name"
+    creation_time
+    "column name"
+    expiration_time
+    "column name"
+    result
+    "column name"
+    state
+    "column name"
+    user_address
+    "column name"
+    username
+}
+
+"select columns of table \"chain_link_chain_config\""
+enum chain_link_chain_config_select_column {
+    "column name"
+    name
+}
+
+"select columns of table \"chain_link_proof\""
+enum chain_link_proof_select_column {
+    "column name"
+    plain_text
+    "column name"
+    public_key
+    "column name"
+    signature
+}
+
+"select columns of table \"chain_link\""
+enum chain_link_select_column {
+    "column name"
+    creation_time
+    "column name"
+    external_address
+    "column name"
+    height
+    "column name"
+    user_address
+}
+
+"select columns of table \"dtag_transfer_requests\""
+enum dtag_transfer_requests_select_column {
+    "column name"
+    receiver_address
+    "column name"
+    sender_address
+}
+
+"column ordering options"
+enum order_by {
+    "in ascending order, nulls last"
+    asc
+    "in ascending order, nulls first"
+    asc_nulls_first
+    "in ascending order, nulls last"
+    asc_nulls_last
+    "in descending order, nulls first"
+    desc
+    "in descending order, nulls first"
+    desc_nulls_first
+    "in descending order, nulls last"
+    desc_nulls_last
+}
+
+"select columns of table \"profile\""
+enum profile_select_column {
+    "column name"
+    address
+    "column name"
+    bio
+    "column name"
+    cover_pic
+    "column name"
+    creation_time
+    "column name"
+    dtag
+    "column name"
+    nickname
+    "column name"
+    profile_pic
+}
+
+"select columns of table \"profiles_params\""
+enum profiles_params_select_column {
+    "column name"
+    params
+}
+
+"select columns of table \"user_block\""
+enum user_block_select_column {
+    "column name"
+    blocked_address
+    "column name"
+    blocker_address
+    "column name"
+    reason
+    "column name"
+    subspace_id
+}
+
+"select columns of table \"user_relationship\""
+enum user_relationship_select_column {
+    "column name"
+    counterparty_address
+    "column name"
+    creator_address
+    "column name"
+    subspace_id
+}
+
+scalar bigint
+
+scalar jsonb
+
+scalar timestamp
+
+"Boolean expression to compare columns of type \"Int\". All fields are combined with logical 'AND'."
+input Int_comparison_exp {
+    _eq: Int
+    _gt: Int
+    _gte: Int
+    _in: [Int!]
+    _is_null: Boolean
+    _lt: Int
+    _lte: Int
+    _neq: Int
+    _nin: [Int!]
+}
+
+"Boolean expression to compare columns of type \"String\". All fields are combined with logical 'AND'."
+input String_comparison_exp {
+    _eq: String
+    _gt: String
+    _gte: String
+    "does the column match the given case-insensitive pattern"
+    _ilike: String
+    _in: [String!]
+    "does the column match the given POSIX regular expression, case insensitive"
+    _iregex: String
+    _is_null: Boolean
+    "does the column match the given pattern"
+    _like: String
+    _lt: String
+    _lte: String
+    _neq: String
+    "does the column NOT match the given case-insensitive pattern"
+    _nilike: String
+    _nin: [String!]
+    "does the column NOT match the given POSIX regular expression, case insensitive"
+    _niregex: String
+    "does the column NOT match the given pattern"
+    _nlike: String
+    "does the column NOT match the given POSIX regular expression, case sensitive"
+    _nregex: String
+    "does the column NOT match the given SQL regular expression"
+    _nsimilar: String
+    "does the column match the given POSIX regular expression, case sensitive"
+    _regex: String
+    "does the column match the given SQL regular expression"
+    _similar: String
+}
+
+"order by aggregate values of table \"application_link\""
+input application_link_aggregate_order_by {
+    count: order_by
+    max: application_link_max_order_by
+    min: application_link_min_order_by
+}
+
+"Boolean expression to filter rows from the table \"application_link\". All fields are combined with a logical 'AND'."
+input application_link_bool_exp {
+    _and: [application_link_bool_exp!]
+    _not: application_link_bool_exp
+    _or: [application_link_bool_exp!]
+    application: String_comparison_exp
+    creation_time: timestamp_comparison_exp
+    expiration_time: timestamp_comparison_exp
+    oracle_request: application_link_oracle_request_bool_exp
+    profile: profile_bool_exp
+    result: jsonb_comparison_exp
+    state: String_comparison_exp
+    user_address: String_comparison_exp
+    username: String_comparison_exp
+}
+
+"order by max() on columns of table \"application_link\""
+input application_link_max_order_by {
+    application: order_by
+    creation_time: order_by
+    expiration_time: order_by
+    state: order_by
+    user_address: order_by
+    username: order_by
+}
+
+"order by min() on columns of table \"application_link\""
+input application_link_min_order_by {
+    application: order_by
+    creation_time: order_by
+    expiration_time: order_by
+    state: order_by
+    user_address: order_by
+    username: order_by
+}
+
+"Boolean expression to filter rows from the table \"application_link_oracle_request\". All fields are combined with a logical 'AND'."
+input application_link_oracle_request_bool_exp {
+    _and: [application_link_oracle_request_bool_exp!]
+    _not: application_link_oracle_request_bool_exp
+    _or: [application_link_oracle_request_bool_exp!]
+    call_data: jsonb_comparison_exp
+    client_id: String_comparison_exp
+    request_id: bigint_comparison_exp
+    script_id: bigint_comparison_exp
+}
+
+"Ordering options when selecting data from \"application_link_oracle_request\"."
+input application_link_oracle_request_order_by {
+    call_data: order_by
+    client_id: order_by
+    request_id: order_by
+    script_id: order_by
+}
+
+"Ordering options when selecting data from \"application_link\"."
+input application_link_order_by {
+    application: order_by
+    creation_time: order_by
+    expiration_time: order_by
+    oracle_request: application_link_oracle_request_order_by
+    profile: profile_order_by
+    result: order_by
+    state: order_by
+    user_address: order_by
+    username: order_by
+}
+
+"Boolean expression to filter rows from the table \"application_link_score\". All fields are combined with a logical 'AND'."
+input application_link_score_bool_exp {
+    _and: [application_link_score_bool_exp!]
+    _not: application_link_score_bool_exp
+    _or: [application_link_score_bool_exp!]
+    details: jsonb_comparison_exp
+    score: Int_comparison_exp
+    timestamp: timestamp_comparison_exp
+}
+
+"Ordering options when selecting data from \"application_link_score\"."
+input application_link_score_order_by {
+    details: order_by
+    score: order_by
+    timestamp: order_by
+}
+
+"Boolean expression to compare columns of type \"bigint\". All fields are combined with logical 'AND'."
+input bigint_comparison_exp {
+    _eq: bigint
+    _gt: bigint
+    _gte: bigint
+    _in: [bigint!]
+    _is_null: Boolean
+    _lt: bigint
+    _lte: bigint
+    _neq: bigint
+    _nin: [bigint!]
+}
+
+"order by aggregate values of table \"chain_link\""
+input chain_link_aggregate_order_by {
+    avg: chain_link_avg_order_by
+    count: order_by
+    max: chain_link_max_order_by
+    min: chain_link_min_order_by
+    stddev: chain_link_stddev_order_by
+    stddev_pop: chain_link_stddev_pop_order_by
+    stddev_samp: chain_link_stddev_samp_order_by
+    sum: chain_link_sum_order_by
+    var_pop: chain_link_var_pop_order_by
+    var_samp: chain_link_var_samp_order_by
+    variance: chain_link_variance_order_by
+}
+
+"order by avg() on columns of table \"chain_link\""
+input chain_link_avg_order_by {
+    height: order_by
+}
+
+"Boolean expression to filter rows from the table \"chain_link\". All fields are combined with a logical 'AND'."
+input chain_link_bool_exp {
+    _and: [chain_link_bool_exp!]
+    _not: chain_link_bool_exp
+    _or: [chain_link_bool_exp!]
+    chain_config: chain_link_chain_config_bool_exp
+    chain_link_proofs: chain_link_proof_bool_exp
+    creation_time: timestamp_comparison_exp
+    external_address: String_comparison_exp
+    height: bigint_comparison_exp
+    profile: profile_bool_exp
+    proof: chain_link_proof_bool_exp
+    user_address: String_comparison_exp
+}
+
+"Boolean expression to filter rows from the table \"chain_link_chain_config\". All fields are combined with a logical 'AND'."
+input chain_link_chain_config_bool_exp {
+    _and: [chain_link_chain_config_bool_exp!]
+    _not: chain_link_chain_config_bool_exp
+    _or: [chain_link_chain_config_bool_exp!]
+    chain_links: chain_link_bool_exp
+    name: String_comparison_exp
+}
+
+"Ordering options when selecting data from \"chain_link_chain_config\"."
+input chain_link_chain_config_order_by {
+    chain_links_aggregate: chain_link_aggregate_order_by
+    name: order_by
+}
+
+"order by max() on columns of table \"chain_link\""
+input chain_link_max_order_by {
+    creation_time: order_by
+    external_address: order_by
+    height: order_by
+    user_address: order_by
+}
+
+"order by min() on columns of table \"chain_link\""
+input chain_link_min_order_by {
+    creation_time: order_by
+    external_address: order_by
+    height: order_by
+    user_address: order_by
+}
+
+"Ordering options when selecting data from \"chain_link\"."
+input chain_link_order_by {
+    chain_config: chain_link_chain_config_order_by
+    chain_link_proofs_aggregate: chain_link_proof_aggregate_order_by
+    creation_time: order_by
+    external_address: order_by
+    height: order_by
+    profile: profile_order_by
+    proof: chain_link_proof_order_by
+    user_address: order_by
+}
+
+"order by aggregate values of table \"chain_link_proof\""
+input chain_link_proof_aggregate_order_by {
+    count: order_by
+    max: chain_link_proof_max_order_by
+    min: chain_link_proof_min_order_by
+}
+
+"Boolean expression to filter rows from the table \"chain_link_proof\". All fields are combined with a logical 'AND'."
+input chain_link_proof_bool_exp {
+    _and: [chain_link_proof_bool_exp!]
+    _not: chain_link_proof_bool_exp
+    _or: [chain_link_proof_bool_exp!]
+    chain_link: chain_link_bool_exp
+    plain_text: String_comparison_exp
+    public_key: jsonb_comparison_exp
+    signature: String_comparison_exp
+}
+
+"order by max() on columns of table \"chain_link_proof\""
+input chain_link_proof_max_order_by {
+    plain_text: order_by
+    signature: order_by
+}
+
+"order by min() on columns of table \"chain_link_proof\""
+input chain_link_proof_min_order_by {
+    plain_text: order_by
+    signature: order_by
+}
+
+"Ordering options when selecting data from \"chain_link_proof\"."
+input chain_link_proof_order_by {
+    chain_link: chain_link_order_by
+    plain_text: order_by
+    public_key: order_by
+    signature: order_by
+}
+
+"order by stddev() on columns of table \"chain_link\""
+input chain_link_stddev_order_by {
+    height: order_by
+}
+
+"order by stddev_pop() on columns of table \"chain_link\""
+input chain_link_stddev_pop_order_by {
+    height: order_by
+}
+
+"order by stddev_samp() on columns of table \"chain_link\""
+input chain_link_stddev_samp_order_by {
+    height: order_by
+}
+
+"order by sum() on columns of table \"chain_link\""
+input chain_link_sum_order_by {
+    height: order_by
+}
+
+"order by var_pop() on columns of table \"chain_link\""
+input chain_link_var_pop_order_by {
+    height: order_by
+}
+
+"order by var_samp() on columns of table \"chain_link\""
+input chain_link_var_samp_order_by {
+    height: order_by
+}
+
+"order by variance() on columns of table \"chain_link\""
+input chain_link_variance_order_by {
+    height: order_by
+}
+
+"order by aggregate values of table \"dtag_transfer_requests\""
+input dtag_transfer_requests_aggregate_order_by {
+    count: order_by
+    max: dtag_transfer_requests_max_order_by
+    min: dtag_transfer_requests_min_order_by
+}
+
+"Boolean expression to filter rows from the table \"dtag_transfer_requests\". All fields are combined with a logical 'AND'."
+input dtag_transfer_requests_bool_exp {
+    _and: [dtag_transfer_requests_bool_exp!]
+    _not: dtag_transfer_requests_bool_exp
+    _or: [dtag_transfer_requests_bool_exp!]
+    receiver: profile_bool_exp
+    receiver_address: String_comparison_exp
+    sender: profile_bool_exp
+    sender_address: String_comparison_exp
+}
+
+"order by max() on columns of table \"dtag_transfer_requests\""
+input dtag_transfer_requests_max_order_by {
+    receiver_address: order_by
+    sender_address: order_by
+}
+
+"order by min() on columns of table \"dtag_transfer_requests\""
+input dtag_transfer_requests_min_order_by {
+    receiver_address: order_by
+    sender_address: order_by
+}
+
+"Ordering options when selecting data from \"dtag_transfer_requests\"."
+input dtag_transfer_requests_order_by {
+    receiver: profile_order_by
+    receiver_address: order_by
+    sender: profile_order_by
+    sender_address: order_by
+}
+
+"Boolean expression to compare columns of type \"jsonb\". All fields are combined with logical 'AND'."
+input jsonb_comparison_exp {
+    "is the column contained in the given json value"
+    _contained_in: jsonb
+    "does the column contain the given json value at the top level"
+    _contains: jsonb
+    _eq: jsonb
+    _gt: jsonb
+    _gte: jsonb
+    "does the string exist as a top-level key in the column"
+    _has_key: String
+    "do all of these strings exist as top-level keys in the column"
+    _has_keys_all: [String!]
+    "do any of these strings exist as top-level keys in the column"
+    _has_keys_any: [String!]
+    _in: [jsonb!]
+    _is_null: Boolean
+    _lt: jsonb
+    _lte: jsonb
+    _neq: jsonb
+    _nin: [jsonb!]
+}
+
+"Boolean expression to filter rows from the table \"profile\". All fields are combined with a logical 'AND'."
+input profile_bool_exp {
+    _and: [profile_bool_exp!]
+    _not: profile_bool_exp
+    _or: [profile_bool_exp!]
+    address: String_comparison_exp
+    applications_links: application_link_bool_exp
+    bio: String_comparison_exp
+    chain_links: chain_link_bool_exp
+    cover_pic: String_comparison_exp
+    creation_time: timestamp_comparison_exp
+    dtag: String_comparison_exp
+    incoming_dtag_transfer_requests: dtag_transfer_requests_bool_exp
+    nickname: String_comparison_exp
+    outgoing_dtag_transfer_requests: dtag_transfer_requests_bool_exp
+    profile_pic: String_comparison_exp
+}
+
+"Ordering options when selecting data from \"profile\"."
+input profile_order_by {
+    address: order_by
+    applications_links_aggregate: application_link_aggregate_order_by
+    bio: order_by
+    chain_links_aggregate: chain_link_aggregate_order_by
+    cover_pic: order_by
+    creation_time: order_by
+    dtag: order_by
+    incoming_dtag_transfer_requests_aggregate: dtag_transfer_requests_aggregate_order_by
+    nickname: order_by
+    outgoing_dtag_transfer_requests_aggregate: dtag_transfer_requests_aggregate_order_by
+    profile_pic: order_by
+}
+
+"Boolean expression to filter rows from the table \"profiles_params\". All fields are combined with a logical 'AND'."
+input profiles_params_bool_exp {
+    _and: [profiles_params_bool_exp!]
+    _not: profiles_params_bool_exp
+    _or: [profiles_params_bool_exp!]
+    params: jsonb_comparison_exp
+}
+
+"Ordering options when selecting data from \"profiles_params\"."
+input profiles_params_order_by {
+    params: order_by
+}
+
+"Boolean expression to compare columns of type \"timestamp\". All fields are combined with logical 'AND'."
+input timestamp_comparison_exp {
+    _eq: timestamp
+    _gt: timestamp
+    _gte: timestamp
+    _in: [timestamp!]
+    _is_null: Boolean
+    _lt: timestamp
+    _lte: timestamp
+    _neq: timestamp
+    _nin: [timestamp!]
+}
+
+"Boolean expression to filter rows from the table \"user_block\". All fields are combined with a logical 'AND'."
+input user_block_bool_exp {
+    _and: [user_block_bool_exp!]
+    _not: user_block_bool_exp
+    _or: [user_block_bool_exp!]
+    blocked: profile_bool_exp
+    blocked_address: String_comparison_exp
+    blocker: profile_bool_exp
+    blocker_address: String_comparison_exp
+    reason: String_comparison_exp
+    subspace_id: bigint_comparison_exp
+}
+
+"Ordering options when selecting data from \"user_block\"."
+input user_block_order_by {
+    blocked: profile_order_by
+    blocked_address: order_by
+    blocker: profile_order_by
+    blocker_address: order_by
+    reason: order_by
+    subspace_id: order_by
+}
+
+"Boolean expression to filter rows from the table \"user_relationship\". All fields are combined with a logical 'AND'."
+input user_relationship_bool_exp {
+    _and: [user_relationship_bool_exp!]
+    _not: user_relationship_bool_exp
+    _or: [user_relationship_bool_exp!]
+    counterparty: profile_bool_exp
+    counterparty_address: String_comparison_exp
+    creator: profile_bool_exp
+    creator_address: String_comparison_exp
+    subspace_id: bigint_comparison_exp
+}
+
+"Ordering options when selecting data from \"user_relationship\"."
+input user_relationship_order_by {
+    counterparty: profile_order_by
+    counterparty_address: order_by
+    creator: profile_order_by
+    creator_address: order_by
+    subspace_id: order_by
+}
