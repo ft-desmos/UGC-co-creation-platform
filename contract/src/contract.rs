@@ -89,8 +89,8 @@ pub fn execute(
 ) -> Result<Response, ContractError> {
     use ExecuteMsg::*;
     match msg {
-        PublishStory { cid } => publish_story(deps, info, cid),
-        UpdateStory { story_id, cid } => update_story(deps, info, story_id, cid),
+        PublishStory { post_id } => publish_story(deps, info, post_id),
+        // UpdateStory { story_id, post_id } => update_story(deps, info, story_id, post_id),
         PublishStoryNft { 
             story_id, 
             image, 
@@ -106,12 +106,12 @@ pub fn execute(
     }
 }
 
-pub fn publish_story(deps: DepsMut, info: MessageInfo, cid: String) -> Result<Response, ContractError> {
+pub fn publish_story(deps: DepsMut, info: MessageInfo, post_id: String) -> Result<Response, ContractError> {
     STORYFACTORY.update(deps.storage, |mut story_factory| -> Result<_, ContractError> {
         let new_story = Story {
             story_id: story_factory.next_story_id.clone(),
             author: info.sender.clone(),
-            cid,
+            post_id,
         };
         story_factory.stories.insert(story_factory.next_story_id, new_story);
         story_factory.next_story_id += 1;
@@ -120,28 +120,28 @@ pub fn publish_story(deps: DepsMut, info: MessageInfo, cid: String) -> Result<Re
     Ok(Response::new())
 }
 
-pub fn update_story(deps: DepsMut, info: MessageInfo, story_id: u64, cid: String) -> Result<Response, ContractError> {
-    STORYFACTORY.update(deps.storage, |mut story_factory| -> Result<_, ContractError> {
-        match story_factory.stories.get(&story_id) {
-            Some(story_info) => {
-                if info.sender != story_info.author {
-                    return Err(ContractError::Unauthorized { sender: info.sender });
-                }
-                let new_story = Story {
-                    story_id: story_info.story_id.clone(),
-                    author: info.sender.clone(),
-                    cid,
-                };
-                story_factory.stories.insert(story_info.story_id, new_story);
-                Ok(story_factory)
-            },
-            None => {
-                return Err(ContractError::StoryNotFound { story_id });
-            },
-        }
-    })?;
-    Ok(Response::new())
-}
+// pub fn update_story(deps: DepsMut, info: MessageInfo, story_id: u64, post_id: String) -> Result<Response, ContractError> {
+//     STORYFACTORY.update(deps.storage, |mut story_factory| -> Result<_, ContractError> {
+//         match story_factory.stories.get(&story_id) {
+//             Some(story_info) => {
+//                 if info.sender != story_info.author {
+//                     return Err(ContractError::Unauthorized { sender: info.sender });
+//                 }
+//                 let new_story = Story {
+//                     story_id: story_info.story_id.clone(),
+//                     author: info.sender.clone(),
+//                     post_id,
+//                 };
+//                 story_factory.stories.insert(story_info.story_id, new_story);
+//                 Ok(story_factory)
+//             },
+//             None => {
+//                 return Err(ContractError::StoryNotFound { story_id });
+//             },
+//         }
+//     })?;
+//     Ok(Response::new())
+// }
 
 pub fn publish_nft(
     deps: DepsMut, 

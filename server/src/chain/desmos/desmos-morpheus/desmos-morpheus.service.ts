@@ -2,9 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { DesmosClient } from "@desmoslabs/desmjs"
 import { ConfigService } from '@nestjs/config';
 import { StoryService } from 'src/story/story.service';
+import { StoryChainTaskService } from 'src/story-chain-task/story-chain-task.service';
 import { NftType } from 'src/story/entities/nft-sale.entity';
 import { Secp256k1, Secp256k1Signature, sha256 } from "@cosmjs/crypto";
 import { StdSignature, decodeSignature, makeSignDoc, serializeSignDoc } from '@cosmjs/amino';
+import Long from "long";
 
 // const proxy = require("node-global-proxy").default;
 // proxy.setConfig("http://127.0.0.1:7890");
@@ -15,18 +17,23 @@ import { StdSignature, decodeSignature, makeSignDoc, serializeSignDoc } from '@c
 export class DesmosMorpheusService implements Chain.ChainIntegration {
     public chain = 'desmos';
     public name = 'desmos';
+    public taskModule: Chain.TaskModuleType = 'basic';
     public factoryAddress = '';
     public findsAddress = '';
     public enabled = true;
     private _provider: DesmosClient;
     private _factory: any;
     public INTERVALS: number;
+    public SUBSPACE_ID: number;
+    public DENOM: string;
+    public CHAINID: string;
 
     private _logger = new Logger(DesmosMorpheusService.name);
 
     constructor(
         private readonly _configSvc: ConfigService,
         private readonly _storySvc: StoryService,
+        private readonly _chainTaskSvc: StoryChainTaskService,
     ) {}
 
     async onModuleInit() {
@@ -36,6 +43,15 @@ export class DesmosMorpheusService implements Chain.ChainIntegration {
         this.factoryAddress = this._configSvc.get('DESMOS_FACTORY_ADDRESS');
         const endpoint = this._configSvc.get('DESMOS_ENDPOINT');
         this._provider = await DesmosClient.connect(endpoint);
+        if (endpoint == "https://rpc.morpheus.desmos.network:443") {
+            this.SUBSPACE_ID = 24 // testnet
+            this.DENOM = "udaric"
+            this.CHAINID = "morpheus-apollo-3"
+        } else {
+            this.SUBSPACE_ID = 23 // mainnet
+            this.DENOM = "udsm"
+            this.CHAINID = "desmos-mainnet"
+        }
 
         if (enableSync) {
             this.INTERVALS = this._configSvc.get('DESMOS_LOOP_INTERVAL');
@@ -65,12 +81,12 @@ export class DesmosMorpheusService implements Chain.ChainIntegration {
         const decodedSig = decodeSignature(get_signature);
         const valid1 = await Secp256k1.verifySignature(
             Secp256k1Signature.fromFixedLength(decodedSig.signature),
-            sha256(serializeSignDoc(makeSignDoc([], { amount: [], gas: "0" }, "desmos-mainnet", params.message, 0, 0))),
+            sha256(serializeSignDoc(makeSignDoc([], { amount: [], gas: "0" }, this.CHAINID, params.message, 0, 0))),
             decodedSig.pubkey,
         );
         const valid2 = await Secp256k1.verifySignature(
             Secp256k1Signature.fromFixedLength(decodedSig.signature),
-            sha256(serializeSignDoc(makeSignDoc([], { amount: [{"amount":"0","denom":"udsm"}], gas: "0" }, "desmos-mainnet", params.message, 0, 0))),
+            sha256(serializeSignDoc(makeSignDoc([], { amount: [{"amount":"0","denom":this.DENOM}], gas: "0" }, this.CHAINID, params.message, 0, 0))),
             decodedSig.pubkey,
         );
         if (valid1 || valid2) {
@@ -98,10 +114,22 @@ export class DesmosMorpheusService implements Chain.ChainIntegration {
         this._factory = JSON.parse(new TextDecoder().decode(contract_info));
         const story = this._factory.stories[chainStoryId];
         if (story.story_id.toString() == '0') return null;
+
+        const postId: number = parseInt(story.post_id, 10);
+        const postInfo = await this._provider.querier.postsV3.post(Long.fromNumber(this.SUBSPACE_ID), Long.fromNumber(postId));
+        const match = postInfo.text.match(/IPFS Cid: (.+)$/);
+        let ipfsCid = "";
+        if (match) {
+            ipfsCid = match[1];
+        } else {
+            this._logger.debug("No CID found")
+            return null;
+        }
+        
         return {
           id: chainStoryId,
           author: story.author,
-          cid: story.cid,
+          cid: ipfsCid,
           addr: this.factoryAddress,
         };
     }
@@ -125,7 +153,11 @@ export class DesmosMorpheusService implements Chain.ChainIntegration {
           price: story_nft.nft_info.price.toString(),
         };
     }
-    
+
+    getTask: (chainStoryId: string, chainTaskId: string) => Promise<Chain.Task>;
+
+    getSubmit: (chainStoryId: string, chainTaskId: string, chainSubmitId: string) => Promise<Chain.Submit>;
+
     private async syncChainData() {
         const INTERVALS = this.INTERVALS * 1000;
         while (true) {

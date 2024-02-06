@@ -5,8 +5,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub enum ExecuteMsg {
-    PublishStory { cid: String},
-    UpdateStory { story_id: u64, cid: String},
+    PublishStory { post_id: String},
+    // UpdateStory { story_id: u64, post_id: String},
     PublishStoryNft { 
         story_id: u64,
         image: String,
@@ -38,7 +38,7 @@ pub enum QueryMsg {
 pub struct Story {
     pub story_id: u64,
     pub author: Addr,
-    pub cid: String,
+    pub post_id: String,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
