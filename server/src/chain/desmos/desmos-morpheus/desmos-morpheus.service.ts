@@ -7,6 +7,8 @@ import { NftType } from 'src/story/entities/nft-sale.entity';
 import { Secp256k1, Secp256k1Signature, sha256 } from "@cosmjs/crypto";
 import { StdSignature, decodeSignature, makeSignDoc, serializeSignDoc } from '@cosmjs/amino';
 import Long from "long";
+import { StoryChainTaskStatus } from '../../../story-chain-task/entities/story-chain-task.entity';
+import { StoryChainTaskSubmitStatus } from '../../../story-chain-task/entities/story-chain-task-submit.entity';
 
 // const proxy = require("node-global-proxy").default;
 // proxy.setConfig("http://127.0.0.1:7890");
@@ -17,7 +19,7 @@ import Long from "long";
 export class DesmosMorpheusService implements Chain.ChainIntegration {
     public chain = 'desmos';
     public name = 'desmos';
-    public taskModule: Chain.TaskModuleType = 'basic';
+    public taskModule: Chain.TaskModuleType = 'chain';
     public factoryAddress = '';
     public findsAddress = '';
     public enabled = true;
@@ -33,7 +35,7 @@ export class DesmosMorpheusService implements Chain.ChainIntegration {
     constructor(
         private readonly _configSvc: ConfigService,
         private readonly _storySvc: StoryService,
-        private readonly _chainTaskSvc: StoryChainTaskService,
+        private readonly _storyTaskSvc: StoryChainTaskService,
     ) {}
 
     async onModuleInit() {
@@ -58,6 +60,9 @@ export class DesmosMorpheusService implements Chain.ChainIntegration {
             this.syncChainData().catch((err) => {
               this._logger.error(`desmosSync chain data failed`, err);
             });
+            this.syncChainTaskData().catch((err) => {
+                this._logger.error(`desmosSync chain task data failed`, err);
+              });
         }
     }
 
@@ -154,9 +159,172 @@ export class DesmosMorpheusService implements Chain.ChainIntegration {
         };
     }
 
-    getTask: (chainStoryId: string, chainTaskId: string) => Promise<Chain.Task>;
+    public async getTask(chainStoryId: string, chainTaskId: string): Promise<Chain.Task> {
+        const utf8Encode = new TextEncoder();
+        const contract_info = await this._provider.queryContractRaw(this.factoryAddress, utf8Encode.encode("story_factory"));
+        this._factory = JSON.parse(new TextDecoder().decode(contract_info));
+        const task_key = chainStoryId + "," + chainTaskId;
+        const taskInfo = this._factory.story_tasks[task_key];
+        if (taskInfo == undefined) return null;
+        let rewardNfts = []
+        if (taskInfo.reward_nfts != null) {
+            const Nfts = taskInfo.reward_nfts.split(",").filter(v=>v!=="");
+            for (let i=0; i<Nfts.length; i++) {
+                rewardNfts.push(parseInt(Nfts[i]))
+            }
+        }
+        return {
+            id: chainTaskId,
+            cid: taskInfo.cid,
+            creator: taskInfo.creator,
+            nft: taskInfo.nft_address,
+            rewardNfts: rewardNfts.map((v) => v.toString()),
+            status: taskInfo.status,
+        };
+    }
 
-    getSubmit: (chainStoryId: string, chainTaskId: string, chainSubmitId: string) => Promise<Chain.Submit>;
+    public async getSubmit(chainStoryId: string, chainTaskId: string, chainSubmitId: string): Promise<Chain.Submit> {
+        const utf8Encode = new TextEncoder();
+        const contract_info = await this._provider.queryContractRaw(this.factoryAddress, utf8Encode.encode("story_factory"));
+        this._factory = JSON.parse(new TextDecoder().decode(contract_info));
+        const submit_key = chainStoryId + "," + chainTaskId + "," + chainSubmitId;
+        const submitInfo = this._factory.task_submits[submit_key];
+        if (submitInfo == undefined) return null;
+        return {
+            id: chainSubmitId,
+            cid: submitInfo.cid,
+            creator: submitInfo.creator,
+            status: submitInfo.status
+        };
+    }
+
+    private async changeTaskStatus(taskStatus: string): Promise<StoryChainTaskStatus> {
+        if (taskStatus == "TODO") {
+            return StoryChainTaskStatus.Todo;
+        }
+        if (taskStatus == "CANCELLED") {
+            return StoryChainTaskStatus.Cancelled;
+        }
+        if (taskStatus == "DONE") {
+            return StoryChainTaskStatus.Done;
+        }
+    }
+
+    private async changeTaskSubmitStatus(taskSubmitStatus: string): Promise<StoryChainTaskSubmitStatus> {
+        if (taskSubmitStatus == "PEDING") {
+            return StoryChainTaskSubmitStatus.PENDING;
+        }
+        if (taskSubmitStatus == "APPROVED") {
+            return StoryChainTaskSubmitStatus.APPROVED;
+        }
+        if (taskSubmitStatus == "WITHDRAWED") {
+            return StoryChainTaskSubmitStatus.WITHDRAWED;
+        }
+    }
+
+    private async syncChainTaskData() {
+        const INTERVALS = this.INTERVALS * 1000;
+        while (true) {
+            try {
+
+                this._logger.debug(`[desmosSyncChainTask] start`);
+                const storyTasksInDb = await this._storyTaskSvc.listTasks({
+                chain: this.chain,
+                });
+                const storyTaskSubmitsInDb = await this._storyTaskSvc.listSubmits({
+                chain: this.chain,
+                });
+                this._logger.debug(
+                    `[desmosSyncChainTask] ${storyTasksInDb.length} tasks & ${storyTaskSubmitsInDb.length} submits in db`,
+                );
+                const utf8Encode = new TextEncoder();
+                const contract_info = await this._provider.queryContractRaw(this.factoryAddress, utf8Encode.encode("story_factory"));
+                this._factory = JSON.parse(new TextDecoder().decode(contract_info));
+                // 遍历task map
+                const tasks = this._factory.story_tasks;
+                const taskKeys = Object.keys(tasks);
+                if (taskKeys.length > 0) {
+                    taskKeys.forEach(async taskKey => {
+                        const task_story_id = taskKey.split(',')[0];
+                        const task_id = taskKey.split(',')[1];
+                        const storyTaskInfo = tasks[taskKey];
+                        const exitedStoryTaskInDb = storyTasksInDb.find(
+                            (task) => task.chainTaskId === task_id && task.chainStoryId === task_story_id,
+                        );
+                        if (!exitedStoryTaskInDb){
+                            console.log(storyTaskInfo);
+
+                            let rewardNfts = []
+                            if (storyTaskInfo.reward_nfts != null) {
+                                const Nfts = storyTaskInfo.reward_nfts.split(",").filter(v=>v!=="");
+                                for (let i=0; i<Nfts.length; i++) {
+                                    rewardNfts.push(parseInt(Nfts[i]))
+                                }
+                            }
+                            const taskStatus = await this.changeTaskStatus(storyTaskInfo.status);
+                            await this._storyTaskSvc.createTask({
+                              chain: this.chain,
+                              chainStoryId: task_story_id,
+                              chainTaskId: task_id,
+                              creator: storyTaskInfo.creator,
+                              nft: storyTaskInfo.nft_address,
+                              rewardNfts: rewardNfts.map((v) => v.toString()),
+                              cid: storyTaskInfo.cid,
+                              status: taskStatus,
+                            });
+                          } else {
+                            const taskStatus = await this.changeTaskStatus(storyTaskInfo.status);
+                            await this._storyTaskSvc.updateTask({
+                              chain: this.chain,
+                              chainStoryId: task_story_id,
+                              chainTaskId: task_id,
+                              cid: storyTaskInfo.cid,
+                              status: taskStatus
+                            });
+                          }
+                    });
+                }
+                const submits = this._factory.task_submits;
+                const submitKeys = Object.keys(submits);
+                if (submitKeys.length > 0) {
+                    submitKeys.forEach(async submitKey => {
+                        const task_story_id = submitKey.split(',')[0];
+                        const task_id = submitKey.split(',')[1];
+                        const submit_id = submitKey.split(',')[2];
+                        const storyTaskSubmitInfo = submits[submitKey];
+                        const exitedStoryTaskSubmitInDb = storyTaskSubmitsInDb.find(
+                            (submit) => submit.chainStoryId === task_story_id && submit.chainTaskId === task_id && submit.chainSubmitId === submit_id,
+                        );
+                        if (!exitedStoryTaskSubmitInDb) {
+                            const taskSubmitStatus = await this.changeTaskSubmitStatus(storyTaskSubmitInfo.status);
+                            await this._storyTaskSvc.createSubmit({
+                              chain: this.chain,
+                              chainStoryId: task_story_id,
+                              chainTaskId: task_id,
+                              chainSubmitId: submit_id,
+                              creator: storyTaskSubmitInfo.creator,
+                              cid: storyTaskSubmitInfo.cid,
+                              status: taskSubmitStatus,
+                            });
+                          } else {
+                            const taskSubmitStatus = await this.changeTaskSubmitStatus(storyTaskSubmitInfo.status);
+                            await this._storyTaskSvc.updateSubmit({
+                              chain: this.chain,
+                              chainStoryId: task_story_id,
+                              chainTaskId: task_id,
+                              chainSubmitId: submit_id,
+                              status: taskSubmitStatus,
+                            });
+                          }
+                    });
+                }
+            } catch (e) {
+                this._logger.error(`desmosSync Desmos chain task data failed`, e);
+            } finally {
+                await new Promise((res) => setTimeout(res, INTERVALS));
+            }
+        }
+    }
 
     private async syncChainData() {
         const INTERVALS = this.INTERVALS * 1000;

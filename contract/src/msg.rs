@@ -19,6 +19,13 @@ pub enum ExecuteMsg {
         total: i32,
     },
     MintStoryNft { story_id: u64 },
+    ClaimAuthorReservedNft { story_id: u64, mint_num: i32 },
+    CreateTask { create_task_para: CreateTaskPara },
+    UpdateTask { update_task_para: UpdateTaskPara },
+    CancelTask { cancel_task_para: CancelTaskPara },
+    CreateTaskSubmit { create_submit_para: UpdateTaskPara },
+    WithdrawTaskSubmit { withdraw_submit_para: WithdrawTaskSubmitPara },
+    MarkTaskDone { mark_task_done_para: WithdrawTaskSubmitPara },
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
@@ -47,6 +54,9 @@ pub struct StoryFactory {
     pub stories: HashMap<u64, Story>,
     pub story_nft: HashMap<u64, StoryNft>,
     pub nft_contracts: HashMap<u64, String>,
+    pub story_task_id: HashMap<u64, u64>, // StoryID, NextTaskID
+    pub story_tasks: HashMap<String, Task>, // StoryID,TaskID, TaskInfo
+    pub task_submits: HashMap<String, Submit>, // StoryID,TaskID,SubmitID, SubmitInfo
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
@@ -68,4 +78,51 @@ pub struct StoryNft {
     pub author: Addr,
     pub sold: i32,
     pub author_claimed: i32,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+pub struct CreateTaskPara {
+    pub story_id: u64,
+    pub cid: String,
+    pub nft_address: String,
+    pub reward_nfts: String,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+pub struct UpdateTaskPara {
+    pub story_id: u64,
+    pub task_id: u64,
+    pub cid: String,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+pub struct CancelTaskPara {
+    pub story_id: u64,
+    pub task_id: u64,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+pub struct WithdrawTaskSubmitPara {
+    pub story_id: u64,
+    pub task_id: u64,
+    pub submit_id: u64
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+pub struct Task {
+    pub id: u64,
+    pub cid: String,
+    pub creator: Addr,
+    pub nft_address: String,
+    pub reward_nfts: String,
+    pub status: String,
+    pub next_submit_id: u64,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+pub struct Submit {
+    pub id: u64,
+    pub cid: String,
+    pub creator: Addr,
+    pub status: String,
 }

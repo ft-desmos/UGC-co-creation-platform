@@ -5,7 +5,7 @@ use thiserror::Error;
 pub enum ContractError {
     #[error("{0}")]
     StdError(#[from] StdError),
-    #[error("{sender} is not story author")]
+    #[error("{sender} , user has no permission")]
     Unauthorized { sender: Addr },
     #[error("story ID: {story_id}, not found")]
     StoryNotFound { story_id: u64 },
@@ -23,4 +23,8 @@ pub enum ContractError {
     Test1 { amount: Uint128 },
     #[error("get: {denom}, {amount}")]
     Test2 { denom: String, amount: Uint128 },
+    #[error("story ID: {story_id}, task ID: {task_id} not found")]
+    StoryTaskNotFound { story_id: u64, task_id: u64 },
+    #[error("story ID: {story_id}, task ID: {task_id}, submit ID: {submit_id} not found")]
+    TaskSubmitNotFound { story_id: u64, task_id: u64, submit_id: u64 },
 }
